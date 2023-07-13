@@ -1,44 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { getContacts, getFilter } from 'redux/selectors';
+import { addContact, deleteContact, setContacts } from 'redux/contactsSlice';
+import { setFilter } from 'redux/filterSlice';
 import ContactForm from '../ContactForm/ContactForm';
 import Filter from '../Filter/Filter';
 import ContactList from '../ContactList/ContactList';
 import css from './App.module.css';
 
 export default function App() {
-  const [contacts, setContacts] = useState([
-    { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-    { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-    { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-    { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-  ]);
-  const [filter, setFilter] = useState('');
+  const contacts = useSelector(getContacts);
+  const contactsFilter = useSelector(getFilter);
 
-  const addContact = newContact => {
+  const dispatch = useDispatch();
+
+  const addNewContact = newContact => {
     let nameCheckingArray = contacts.map(contact => contact.name);
     if (!nameCheckingArray.includes(newContact.name)) {
-      setContacts(prevContacts => [...prevContacts, newContact]);
+      dispatch(addContact(newContact.name, newContact.number));
     } else {
       alert(`${newContact.name} is already in contacts`);
     }
   };
 
-  const deleteContact = contactId => {
-    setContacts(prevContacts =>
-      prevContacts.filter(contact => contact.id !== contactId)
-    );
+  const delContact = contactId => {
+    dispatch(deleteContact(contactId));
   };
 
   const setContactFilter = value => {
-    setFilter(value);
+    dispatch(setFilter(value));
   };
 
-  const contactsFilter = () => {
-    if (filter === '') {
+  const filterContacts = () => {
+    if (contactsFilter === '') {
       return contacts;
     }
 
     const filteredContacts = contacts.filter(contact =>
-      contact.name.toLowerCase().includes(filter.toLowerCase())
+      contact.name.toLowerCase().includes(contactsFilter.toLowerCase())
     );
     return filteredContacts;
   };
@@ -48,12 +47,12 @@ export default function App() {
       const savedContacts = localStorage.getItem('contacts');
       const parsedContacts = JSON.parse(savedContacts);
       if (parsedContacts) {
-        setContacts(parsedContacts);
+        dispatch(setContacts(parsedContacts));
       }
     } catch (error) {
       console.log(error);
     }
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     localStorage.setItem('contacts', JSON.stringify(contacts));
@@ -62,12 +61,12 @@ export default function App() {
   return (
     <div className={css.wraper}>
       <h1>Phonebook</h1>
-      <ContactForm newContactData={addContact}></ContactForm>
+      <ContactForm newContactData={addNewContact}></ContactForm>
       <h2>Contacts</h2>
       <Filter setFilter={setContactFilter}></Filter>
       <ContactList
-        contacts={contactsFilter()}
-        deleteContact={deleteContact}
+        contacts={filterContacts()}
+        deleteContact={delContact}
       ></ContactList>
     </div>
   );
