@@ -1,10 +1,13 @@
-import PropTypes from 'prop-types';
+import { useDispatch } from 'react-redux';
+import { setFilter } from 'redux/filterSlice';
 import css from './Filter.module.css';
 
-export default function Filter({ setFilter }) {
-  const setFilterValue = e => {
+export default function Filter() {
+  const dispatch = useDispatch();
+
+  const setContactFilter = e => {
     let value = e.currentTarget.value.toLowerCase();
-    setFilter(value);
+    dispatch(setFilter(value));
   };
 
   return (
@@ -16,13 +19,9 @@ export default function Filter({ setFilter }) {
         type="text"
         name="filter"
         id="filter"
-        onChange={setFilterValue}
+        onChange={setContactFilter}
         className={css.filterInput}
       ></input>
     </div>
   );
 }
-
-Filter.propTypes = {
-  setFilter: PropTypes.func.isRequired,
-};

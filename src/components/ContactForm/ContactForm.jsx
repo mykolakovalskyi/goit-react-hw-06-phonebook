@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import css from './ContactForm.module.css';
+import { useSelector, useDispatch } from 'react-redux';
+import { getContacts } from 'redux/selectors';
+import { addContact } from 'redux/contactsSlice';
 
 export default function ContactForm({ newContactData }) {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
+
+  const dispatch = useDispatch();
+  const contacts = useSelector(getContacts);
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -20,12 +25,12 @@ export default function ContactForm({ newContactData }) {
   const handleSubmit = e => {
     e.preventDefault();
 
-    const newContact = {
-      name,
-      number,
-    };
-
-    newContactData(newContact);
+    let nameCheckingArray = contacts.map(contact => contact.name);
+    if (!nameCheckingArray.includes(name)) {
+      dispatch(addContact(name, number));
+    } else {
+      alert(`${name} is already in contacts`);
+    }
 
     reset();
   };
@@ -65,7 +70,3 @@ export default function ContactForm({ newContactData }) {
     </form>
   );
 }
-
-ContactForm.propTypes = {
-  newContactData: PropTypes.func.isRequired,
-};
